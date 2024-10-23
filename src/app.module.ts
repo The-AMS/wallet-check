@@ -1,14 +1,19 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TelegramModule } from './telegram/telegram.module';
-import { WalletModule } from './wallet/wallet.module';
-import { TransactionModule } from './transaction/transaction.module';
 import { DatabaseModule } from './database/database.module';
+import { BscScanModule } from './bsc-scan/bsc-scan.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [TelegramModule, WalletModule, TransactionModule, DatabaseModule],
-  controllers: [AppController],
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+    TelegramModule,
+    DatabaseModule,
+    BscScanModule,
+  ],
   providers: [AppService],
 })
 export class AppModule {}
