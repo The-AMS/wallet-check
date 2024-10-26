@@ -88,40 +88,49 @@ export class TelegramService implements OnModuleInit {
 
       this.bot.sendMessage(
         chatId,
-        `Are you sure to remove your wallet address?\nPlease answer with 'yes' or 'no'`,
+        `Are you sure to remove your wallet address?`,
+        {
+          reply_markup: {
+            inline_keyboard: [
+              [
+                { text: 'Yes', callback_data: 'yes' },
+                { text: 'No', callback_data: 'no' },
+              ],
+            ],
+          },
+        },
       );
 
-      // Set up listener for the next message containing the answer
-      this.bot.once('message', async (msg) => {
-        const answer = msg.text;
+      // Set up listener for the next callback query
+      this.bot.once('callback_query', async (query) => {
+        const answer = query.data;
 
-        // Validate the answer format
-        const regex = /^(yes|no)$/i;
-        const validAnswer = regex.test(answer);
-        if (!validAnswer) {
-          this.bot.sendMessage(
-            chatId,
-            `Invalid answer\nTry again /removewallet `,
-          );
-          return;
-        }
-
-        try {
-          const result = await this.databaseService.removeUserWallet(chatId);
-          if (result) {
+        if (answer === 'yes') {
+          try {
+            const result = await this.databaseService.removeUserWallet(chatId);
+            if (result) {
+              this.bot.sendMessage(
+                chatId,
+                `Wallet address removed successfully.`,
+              );
+            } else {
+              this.bot.sendMessage(
+                chatId,
+                'No wallet address found to remove.',
+              );
+            }
+          } catch (error) {
             this.bot.sendMessage(
               chatId,
-              `Wallet address removed successfully.`,
+              'An error occurred while removing your wallet address.',
             );
-          } else {
-            this.bot.sendMessage(chatId, 'No wallet address found to remove.');
           }
-        } catch (error) {
-          this.bot.sendMessage(
-            chatId,
-            'An error occurred while removing your wallet address.',
-          );
+        } else {
+          this.bot.sendMessage(chatId, `Wallet removal cancelled.`);
         }
+
+        // Acknowledge the callback to prevent timeouts
+        this.bot.answerCallbackQuery(query.id);
       });
     });
   }
