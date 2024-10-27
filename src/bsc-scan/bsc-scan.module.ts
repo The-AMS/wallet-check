@@ -1,9 +1,11 @@
 import { Module } from '@nestjs/common';
-import { BscScanController } from './bsc-scan.controller';
 import { BscScanService } from './bsc-scan.service';
+import { HttpModule } from '@nestjs/axios';
+import { DatabaseModule } from 'src/database/database.module';
 
 @Module({
-  controllers: [BscScanController],
+  imports: [DatabaseModule, HttpModule],
   providers: [BscScanService],
+  exports: [BscScanService],
 })
 export class BscScanModule {}

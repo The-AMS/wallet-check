@@ -2,11 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User } from './user.schema';
 import { Model } from 'mongoose';
-import e from 'express';
 
 @Injectable()
 export class DatabaseService {
-  constructor(@InjectModel(User.name) private userModel: Model<User>) {}
+  constructor(@InjectModel(User.name) public userModel: Model<User>) {}
 
   async saveUser(chatId: number, walletAddress: string): Promise<User> {
     const existingUser = await this.userModel.findOne({ chatId });
@@ -28,5 +27,8 @@ export class DatabaseService {
       console.error('Error removing wallet:', error);
       return false;
     }
+  }
+  async findUserByChatId(chatId: number): Promise<User | null> {
+    return this.userModel.findOne({ chatId });
   }
 }

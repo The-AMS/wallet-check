@@ -1,6 +1,8 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import * as TelegramBot from 'node-telegram-bot-api';
 import { DatabaseService } from 'src/database/database.service';
+import { BscScanService } from 'src/bsc-scan/bsc-scan.service';
+import { ethers } from 'ethers';
 
 @Injectable()
 export class TelegramService implements OnModuleInit {
@@ -11,19 +13,29 @@ export class TelegramService implements OnModuleInit {
     '/start - Start the bot and get a welcome message.',
     '/help - Show the list of available commands.',
     '/setwallet - Sets a BSC wallet to observe.',
+    '/getbalance - Check the balance of wallet',
     '/checktransaction - Fetches the last N transactions for the set wallet.',
     '/removewallet - Removes the saved wallet address for the user.',
   ];
 
-  // injecting the data base service
-  constructor(private readonly databaseService: DatabaseService) {}
+  // injecting the database service
+  constructor(
+    private readonly databaseService: DatabaseService,
+    private readonly bscScanService: BscScanService,
+  ) {}
 
+  // turning bot on
   onModuleInit() {
     const token = process.env.TELEGRAM_BOT_TOKEN;
     this.bot = new TelegramBot(token, { polling: true });
     this.regirterCommands();
   }
+  unitConvert(weiValue: any): string {
+    const etherValue = ethers.formatUnits(weiValue, 'ether');
+    return etherValue;
+  }
 
+  // handling commands
   private regirterCommands() {
     // start
     this.bot.onText(/\/start/, (msg) => {
@@ -44,7 +56,6 @@ export class TelegramService implements OnModuleInit {
     });
 
     // setwallet
-    // Set up listener for /setwallet command
     this.bot.onText(/\/setwallet/, (msg) => {
       const chatId = msg.chat.id;
 
@@ -132,6 +143,43 @@ export class TelegramService implements OnModuleInit {
         // Acknowledge the callback to prevent timeouts
         this.bot.answerCallbackQuery(query.id);
       });
+    });
+
+    // getbalance
+    this.bot.onText(/\/getbalance/, async (msg) => {
+      const chatId = msg.chat.id;
+
+      try {
+        // First, retrieve the user's wallet address from the database
+        const user = await this.databaseService.findUserByChatId(chatId);
+        if (!user || !user.walletAddress) {
+          this.bot.sendMessage(
+            chatId,
+            'Your wallet address was not found. Please register it first.',
+          );
+          return;
+        }
+
+        // Fetch wallet information from BscScan API
+        const walletData = await this.bscScanService.getWalletData(
+          user.walletAddress,
+        );
+
+        // converting wei format to bnb
+        let convertedData = this.unitConvert(walletData.result);
+
+        // Send the data to the user
+        this.bot.sendMessage(
+          chatId,
+          `Your wallet information:\nBalance: ${convertedData} bnb`,
+        );
+      } catch (error) {
+        console.error('Error fetching wallet data:', error);
+        this.bot.sendMessage(
+          chatId,
+          'There was an issue retrieving your wallet information.',
+        );
+      }
     });
   }
 }
