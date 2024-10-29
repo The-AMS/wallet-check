@@ -3,7 +3,7 @@ import { DatabaseService } from 'src/database/database.service';
 import { BscScanService } from 'src/bsc-scan/bsc-scan.service';
 
 // start command handler
-export function handleStartCommand(bot: TelegramBot) {
+export function startCommand(bot: TelegramBot) {
   bot.onText(/\/start/, (msg) => {
     const chatId = msg.chat.id;
     bot.sendMessage(
@@ -14,7 +14,7 @@ export function handleStartCommand(bot: TelegramBot) {
 }
 
 // help command handler
-export function handleHelpCommand(bot: TelegramBot, commandList: string[]) {
+export function helpCommand(bot: TelegramBot, commandList: string[]) {
   bot.onText(/\/help/, (msg) => {
     const chatId = msg.chat.id;
     bot.sendMessage(
@@ -25,7 +25,7 @@ export function handleHelpCommand(bot: TelegramBot, commandList: string[]) {
 }
 
 // setwallet command handler
-export function handleSetWalletCommand(
+export function setWalletCommand(
   bot: TelegramBot,
   databaseService: DatabaseService,
 ) {
@@ -63,7 +63,7 @@ export function handleSetWalletCommand(
 }
 
 // removewallet command handler
-export function handleRemoveWalletCommand(
+export function removeWalletCommand(
   bot: TelegramBot,
   databaseService: DatabaseService,
 ) {
@@ -109,7 +109,7 @@ export function handleRemoveWalletCommand(
 }
 
 // getbalance command handler
-export function handleGetBalanceCommand(
+export function getBalanceCommand(
   bot: TelegramBot,
   databaseService: DatabaseService,
   bscScanService: BscScanService,
@@ -128,7 +128,9 @@ export function handleGetBalanceCommand(
         return;
       }
 
-      const walletData = await bscScanService.getWalletData(user.walletAddress);
+      const walletData = await bscScanService.getWalletBalance(
+        user.walletAddress,
+      );
       const convertedData = unitConvert(walletData.result);
 
       bot.sendMessage(
@@ -139,6 +141,48 @@ export function handleGetBalanceCommand(
       bot.sendMessage(
         chatId,
         'There was an issue retrieving your wallet information.',
+      );
+    }
+  });
+}
+
+// checktransaction command handler
+
+export function checkTransactionCommand(
+  bot: TelegramBot,
+  databaseService: DatabaseService,
+  bscScanService: BscScanService,
+) {
+  bot.onText(/\/checktransaction/, async (msg) => {
+    const chatId = msg.chat.id;
+
+    try {
+      const user = await databaseService.findUserByChatId(chatId);
+      if (!user || !user.walletAddress) {
+        bot.sendMessage(
+          chatId,
+          'Your wallet address was not found. Please register it first.',
+        );
+        return;
+      }
+
+      const transactionData = await bscScanService.getTransaction(
+        user.walletAddress,
+      );
+
+      if (!transactionData || transactionData.length === 0) {
+        bot.sendMessage(chatId, 'No transactions found for this wallet.');
+      } else {
+        const transactionDetails = transactionData
+          .map((tx) => `Hash: ${tx.hash}, Value: ${tx.value}`)
+          .join('\n');
+        bot.sendMessage(chatId, `Transaction Data:\n${transactionDetails}`);
+      }
+    } catch (error) {
+      console.error('Error retrieving transaction data:', error);
+      bot.sendMessage(
+        chatId,
+        `There was an issue retrieving your transaction information.`,
       );
     }
   });

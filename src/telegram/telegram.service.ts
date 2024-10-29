@@ -4,11 +4,12 @@ import { DatabaseService } from 'src/database/database.service';
 import { BscScanService } from 'src/bsc-scan/bsc-scan.service';
 import { unitConvert } from './utils/conversion';
 import {
-  handleStartCommand,
-  handleHelpCommand,
-  handleSetWalletCommand,
-  handleRemoveWalletCommand,
-  handleGetBalanceCommand,
+  startCommand,
+  helpCommand,
+  setWalletCommand,
+  removeWalletCommand,
+  getBalanceCommand,
+  checkTransactionCommand,
 } from './commands/command.handlers';
 
 @Injectable()
@@ -36,15 +37,20 @@ export class TelegramService implements OnModuleInit {
   }
 
   private registerCommands() {
-    handleStartCommand(this.bot);
-    handleHelpCommand(this.bot, this.commandList);
-    handleSetWalletCommand(this.bot, this.databaseService);
-    handleRemoveWalletCommand(this.bot, this.databaseService);
-    handleGetBalanceCommand(
+    startCommand(this.bot);
+    helpCommand(this.bot, this.commandList);
+    setWalletCommand(this.bot, this.databaseService);
+    removeWalletCommand(this.bot, this.databaseService);
+    getBalanceCommand(
       this.bot,
       this.databaseService,
       this.bscScanService,
       unitConvert,
+    );
+    checkTransactionCommand(
+      this.bot,
+      this.databaseService,
+      this.bscScanService,
     );
   }
 }
