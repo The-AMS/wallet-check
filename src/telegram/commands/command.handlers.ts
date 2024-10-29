@@ -2,7 +2,7 @@ import * as TelegramBot from 'node-telegram-bot-api';
 import { DatabaseService } from 'src/database/database.service';
 import { BscScanService } from 'src/bsc-scan/bsc-scan.service';
 
-// /start command handler
+// start command handler
 export function handleStartCommand(bot: TelegramBot) {
   bot.onText(/\/start/, (msg) => {
     const chatId = msg.chat.id;
@@ -13,7 +13,7 @@ export function handleStartCommand(bot: TelegramBot) {
   });
 }
 
-// /help command handler
+// help command handler
 export function handleHelpCommand(bot: TelegramBot, commandList: string[]) {
   bot.onText(/\/help/, (msg) => {
     const chatId = msg.chat.id;
@@ -24,7 +24,7 @@ export function handleHelpCommand(bot: TelegramBot, commandList: string[]) {
   });
 }
 
-// /setwallet command handler
+// setwallet command handler
 export function handleSetWalletCommand(
   bot: TelegramBot,
   databaseService: DatabaseService,
@@ -62,7 +62,7 @@ export function handleSetWalletCommand(
   });
 }
 
-// /removewallet command handler
+// removewallet command handler
 export function handleRemoveWalletCommand(
   bot: TelegramBot,
   databaseService: DatabaseService,
@@ -108,7 +108,7 @@ export function handleRemoveWalletCommand(
   });
 }
 
-// /getbalance command handler
+// getbalance command handler
 export function handleGetBalanceCommand(
   bot: TelegramBot,
   databaseService: DatabaseService,

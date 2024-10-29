@@ -44,7 +44,7 @@ export class TelegramService implements OnModuleInit {
       this.bot,
       this.databaseService,
       this.bscScanService,
-      this.unitConvert.bind(this),
+      unitConvert,
     );
   }
 }
