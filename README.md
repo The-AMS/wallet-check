@@ -1,4 +1,4 @@
-# Wallet Check
+# Wallet Check (Telegram bot)
 
 ## Description
 Wallet Check is a NestJS application designed to interact with the Binance Smart Chain (BSC) and provide users with wallet checking functionalities through a Telegram bot.
