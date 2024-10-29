@@ -13,7 +13,7 @@ Wallet Check is a NestJS application designed to interact with the Binance Smart
 To get started with Wallet Check, clone the repository and install the dependencies:
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/The-AMS/wallet-check.git
 cd wallet-check
 npm install
 ```
