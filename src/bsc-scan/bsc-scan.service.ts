@@ -23,15 +23,15 @@ export class BscScanService {
 
     try {
       const response = await firstValueFrom(this.httpService.get(url));
-      // بررسی اینکه آیا result وجود دارد و آیا آرایه است
+
       if (response.data && Array.isArray(response.data.result)) {
-        return response.data.result; // برگرداندن آرایه‌ای از تراکنش‌ها
+        return response.data.result;
       } else {
         throw new Error('Invalid response structure');
       }
     } catch (error) {
       console.error('Error fetching transactions:', error);
-      throw error; // خطا را پرتاب کنید تا در مکان دیگری مدیریت شود
+      throw error;
     }
   }
 }
